@@ -3,24 +3,21 @@ from flask_restful import Resource, Api, reqparse
 
 #  https://flask-restful.readthedocs.io/en/latest/quickstart.html
 #  Use Postman desktop application for testing
-# MongoDB automatically in JSON
+#  MongoDB automatically in JSON
 
-# r = requests.get()
-# r_text = r.json()
+app = Flask(__name__)  ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+api = Api(app)  ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-app = Flask(__name__)
-api = Api(app)
-
+#  API for dealing with the list of files as a whole
 class fileListApi(Resource):
     def __init__(self):  # Upon initialisation of the class
-        global fileS
-        self.server = fileS
-        print ('server', self.server.files)
+        global fileS  # Init the global server
+        self.server = fileS  # Init the global server
         super(fileListApi, self).__init__()  # Initialising the Resource class
         self.reqparser = reqparse.RequestParser()
 
         # For every value coming in JSON, you need an argument
-        self.reqparser.add_argument('name', type=str, location = 'json')  # Repeat for multiple variables
+        self.reqparser.add_argument('filename', type=str, location = 'json')  # Repeat for multiple variables
         # e.g to add a client_ID value do:
         # self.reqparser.add_argument('client_ID', type=str, location = 'json')  # Repeat for multiple variables
 
@@ -28,6 +25,7 @@ class fileListApi(Resource):
         return {"Files": self.server.files}
         # return {"Hello": "World"}  # Automatically converted to JSON since returning a dictionary
 
+    #  Creating new file data
     def post(self):
         args = self.reqparser.parse_args()  #
         f = {}
@@ -36,63 +34,73 @@ class fileListApi(Resource):
         self.server.files.append(f)
         return {'file': f}
 
-    def put(self):
-        pass
+    def put(self):  ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+        pass  ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-    def delete(self):
-        pass
-
+    def delete(self):  ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+        pass  ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 #  Created a route at /files with an endpoint called files
-api.add_resource(fileListApi, "/files", endpoint="files")
+api.add_resource(fileListApi, "/filedir", endpoint="filelist")  ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 
+#  API for dealing with individual files
 class fileApi(Resource):
     def __init__(self):
         global fileS
         self.server = fileS
-        print('server', self.server.files)
         super(fileApi, self).__init__()  # Initialising the Resource class
         self.reqparser = reqparse.RequestParser()  # Init a request parser
 
         # For every value coming in JSON, you need an argument
-        self.reqparser.add_argument('name', type=str, location='json')  # Repeat for multiple variables
+        self.reqparser.add_argument('filename', type=str, location='json')  # Repeat for multiple variables
         # self.reqparser.add_argument('Client_ID', type=str, location = 'json')  # Repeat for multiple variables
 
-    def get(self, name):
-        f = [f for f in self.server.files if f['name'] == name]
+    def get(self, filename):
+        f = [f for f in self.server.files if f['filename'] == filename]
         if len(f) == 0:
             return {'success': False}  # Not in the list
         f = f[0]  # Take first element of f (should only be one)
-        return {"File": f}
+        datatosend = self.server.filedata[f['filename']]
+
+        return {"filedata": datatosend}  # f['filename'] to just get the name of the file
         # return {"Hello": "World"}  # Automatically converted to JSON since returning a dictionary
 
-    def put(self, name):
-        f = [f for f in self.server.files if f['name'] == name]
+    def put(self, filename):
+        f = [f for f in self.server.files if f['filename'] == filename]
         if len(f) == 0:
             return {'success': False}
         f = f[0]  # Only take the first value
-        args = self.reqparser.parse_args()  #
+        args = self.reqparser.parse_args()  # args is a list containing
         for k, v in args.items():
             if v != None:
                 f[k] = v
         return {'file': f}
 
-    def delete(self, name):
-        pass
+    def delete(self, filename):  ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+        pass  ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 #  Created a route at /files/'input string' with an endpoint called files
 #  The 'input string' is taken as the value "name"
 #  This API handles requests such as GET /files/Python3 and PUT {"name":
 #  "Javascript"} for /files/Python
-api.add_resource(fileApi, "/files/<string:name>", endpoint="file")
+api.add_resource(fileApi, "/filedir/<string:filename>", endpoint="file")  ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
 
 class fileServer():
     def __init__(self):
-        print ('starting')
-        self.files = [{'name':'Javascript'},{'name':'Python'},{'name':'Ruby'}]
-        print ('done')
+        with open("file1.txt", "r") as myfile:
+            data1 = myfile.readlines()
 
-if __name__ == "__main__":
-    fileS = fileServer()
-    app.run(debug=True)
+        with open("file2.txt", "r") as myfile:
+            data2 = myfile.readlines()
+
+        self.filedata = {'file1':data1, 'file2':data2}
+
+        print(data1)
+        #  Init files
+        self.files = [{'filename':'file1'},{'filename':'file2'}]
+
+if __name__ == "__main__":  ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    fileS = fileServer()  # Fill fileS with the init values of class fileServer
+    app.run(debug=True)  ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
