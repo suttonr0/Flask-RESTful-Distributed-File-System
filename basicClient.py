@@ -6,14 +6,13 @@ import requests, json, clientLibrary
 
 def run():
     clientLibrary.listFiles('127.0.0.1', 5000)
-    firstFile = clientLibrary.getFile('localhost', 5000, 'file2.txt')
-    firstFile = clientLibrary.editFile(firstFile, "hello new text here")
-    clientLibrary.putFile('localhost', 5000, firstFile)
+    firstFile = clientLibrary.getFile('localhost', 5000, 'file1.txt')
+    if firstFile != -1:
+        clientLibrary.editFile('localhost', 5000, firstFile, "hello new text here")
     clientLibrary.createFile('localhost', 5000, 'superfile3.txt', "What a great file")
     clientLibrary.listFiles('127.0.0.1', 5000)
-
-    # out_text = "Why hello there what a nice evening"
-    # r = requests.put('http://localhost:5000/filedir/file2.txt', json={'version':10, 'data':out_text})  ## NEED JSON
+    clientLibrary.deleteFile('localhost', 5000, 'superfile3.txt')
+    clientLibrary.listFiles('127.0.0.1', 5000)
 
 if __name__ == "__main__":
     run()

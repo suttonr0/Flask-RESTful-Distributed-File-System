@@ -63,6 +63,15 @@ class fileApi(Resource):
         return f # f['filename'] to just get the name of the file
         # return {"Hello": "World"}  # Automatically converted to JSON since returning a dictionary
 
+    def delete(self, filename):
+        f = [f for f in self.server.files if f['filename'] == filename]
+        if len(f) == 0:
+            print("missed")
+            return {'success': False}  # Not in the list
+        self.server.files[:] = [d for d in self.server.files if d.get('filename') != filename]
+        print(self.server.files)
+        return {'success':True}
+
     #  FILENAME IS PASSED FROM ENDPOINT <STRING>
     def put(self, filename):
         args = self.reqparser.parse_args()  # args is a list containing the new data
@@ -70,13 +79,12 @@ class fileApi(Resource):
         # print(args['version'])
         f = [f for f in self.server.files if f['filename'] == filename]
         if len(f) == 0:
-            return {'success': False}
+            return {'success': 'notOnServer'}
         f = f[0]  # Only take the first value.
         # f now contains the JSON data for the filename passed through the endpoint <string>
-
         # Check version
         if args['version'] < f['version']:
-            return {'success':False}
+            return {'success':'outOfDate'}
 
         args['version'] = args['version'] + 1  # increment version number
 
@@ -89,7 +97,8 @@ class fileApi(Resource):
         # Update file data on disk
         # write_file = open(f['filename'],"w+")
         print(f)
-        return {'file': f}
+        return {'success':f}
+
 
 #  Created a route at /files/'input string' with an endpoint called files
 #  The 'input string' is taken as the value "name"
