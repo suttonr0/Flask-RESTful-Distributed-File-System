@@ -21,7 +21,7 @@ def getFile(ip, port, filename):
     json_data = json.loads(r.text)  # JSON to dict (JSON
     if 'success' in json_data:
         if json_data['success'] == False:
-            print("(Get) File does not exist on server")
+            print("getFile) File does not exist on server")
             return -1
     print("GET file: name {}, version {}, content {}".format(json_data['filename'], json_data['version'], json_data['data']))
     return json_data
@@ -35,9 +35,9 @@ def editFile(ip, port, fileDict, newText):
     r = requests.put(location, json={'version': fileDict['version'], 'data':fileDict['data']})
     json_data = json.loads(r.text)
     if json_data['success'] == 'notOnServer':
-        print("(Edit) File does not exist on server")
+        print("(editFile) File does not exist on server")
     elif json_data['success'] == 'outOfDate':
-        print("(Edit) File is behind on version")
+        print("(editFile) File is behind on version")
         return -1
 
 # Creates a new file called filename with content data (POST)
@@ -46,7 +46,7 @@ def createFile(ip, port, filename, data):
     r = requests.post(location, json={'filename': filename, 'version': 0, 'data': data})
     json_data = json.loads(r.text)
     if json_data['success'] == False:
-        print("(Create) We've already got that file. It hasn't been added")
+        print("(createFile) The file already exists")
 
 # Deletes the file on the server, returns -1 if file not found
 def deleteFile(ip, port, filename):
@@ -55,5 +55,12 @@ def deleteFile(ip, port, filename):
     json_data = json.loads(r.text)  # JSON to dict (JSON
     if 'success' in json_data:
         if json_data['success'] == False:
-            print("(Delete) File does not exist on server")
+            print("(deleteFile) File does not exist on server")
             return -1
+        elif json_data['success'] == True:
+            print("Successful deletion")
+
+def printFile(fileDict):
+    print("--------------------------")
+    print("File Name: {}\nVersion Number: {}\nFile Content:\n{}".format(fileDict['filename'], fileDict['version'], ''.join(fileDict['data'])))
+    print("--------------------------")
