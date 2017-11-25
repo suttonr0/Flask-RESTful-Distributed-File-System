@@ -21,9 +21,9 @@ def getFile(ip, port, filename):
     json_data = json.loads(r.text)  # JSON to dict (JSON
     if 'success' in json_data:
         if json_data['success'] == False:
-            print("getFile) File does not exist on server")
+            print("(getFile) File does not exist on server")
             return -1
-    print("GET file: name {}, version {}, content {}".format(json_data['filename'], json_data['version'], json_data['data']))
+    # print("GET file: name {}, version {}, content {}".format(json_data['filename'], json_data['version'], json_data['data']))
     return json_data
 
 # Takes a dictionary of the file, replaces the data with newText and
@@ -61,6 +61,7 @@ def deleteFile(ip, port, filename):
             print("Successful deletion")
 
 def printFile(fileDict):
+
     print("--------------------------")
     print("File Name: {}\nVersion Number: {}\nFile Content:\n{}".format(fileDict['filename'], fileDict['version'], ''.join(fileDict['data'])))
     print("--------------------------")

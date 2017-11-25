@@ -23,14 +23,15 @@ def run():
         elif userChoice == '2':
             userFile = input("Enter the file name: ")  # must include file extension
             fileRecv = clientLibrary.getFile(ipAddress, portNumber, userFile)
-            clientLibrary.printFile(fileRecv)
+            if fileRecv != -1:
+                clientLibrary.printFile(fileRecv)
 
         elif userChoice == '3':
             userFile = input("Enter the file name: ")
             fileRecv = clientLibrary.getFile(ipAddress, portNumber, userFile)
-            clientLibrary.printFile(fileRecv)
-            dataToWrite = input("Type the text you want to write to the file: ")
             if fileRecv != -1:
+                clientLibrary.printFile(fileRecv)
+                dataToWrite = input("Type the text you want to write to the file: ")
                 clientLibrary.editFile(ipAddress, portNumber, fileRecv, dataToWrite)
             else:
                 print("File not found\n")
