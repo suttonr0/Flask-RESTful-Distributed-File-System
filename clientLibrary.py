@@ -5,7 +5,12 @@ def listFiles(ip, port):
     location = 'http://{}:{}/filedir'.format(ip, port)
     r = requests.get(location)
     json_data = json.loads(r.text)  # JSON to dict
-    print(json_data)
+    print("List of files on file server:\n")
+    for x in json_data:
+        # ''.join(x['data']) to concatenate the strings in the list form fopen
+        print("--------------------------")
+        print("File Name: {}\nVersion Number: {}\nFile Content:\n{}".format(x['filename'], x['version'], ''.join(x['data'])))
+        print("--------------------------")
 
 # Returns a dictionary with the file name, version number and file content for the filename
 # passed on the fileserver with provided port and ip

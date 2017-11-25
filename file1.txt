@@ -1,1 +1,4 @@
 hello new text here
+with newlines
+
+multiple new lines
