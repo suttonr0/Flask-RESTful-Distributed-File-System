@@ -1,2 +1,1 @@
-THIS FILE
-IS FILE 2
+File 2 data

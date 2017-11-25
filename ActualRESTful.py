@@ -33,9 +33,13 @@ class fileListApi(Resource):
         for k, v in args.items():
             f[k] = v
         if f in self.server.files:
-            return {'success':False}
+            return {'success':False}  # Already in the filesystem
         else:
-            self.server.files.append(f)
+            self.server.files.append(f)  # append to file list
+            # Write to disk
+            currentFile = open(f['filename'], 'w')
+            currentFile.write(f['data'])
+            currentFile.close()
             return {'success':True}
 
 #  Created a route at /files with an endpoint called files
@@ -66,9 +70,10 @@ class fileApi(Resource):
     def delete(self, filename):
         f = [f for f in self.server.files if f['filename'] == filename]
         if len(f) == 0:
-            print("missed")
             return {'success': False}  # Not in the list
         self.server.files[:] = [d for d in self.server.files if d.get('filename') != filename]
+        if os.path.exists(filename):
+            os.remove(filename)  # Delete the file from server storage
         print(self.server.files)
         return {'success':True}
 
@@ -95,7 +100,9 @@ class fileApi(Resource):
                 f[k] = v
 
         # Update file data on disk
-        # write_file = open(f['filename'],"w+")
+        currentFile = open(f['filename'], 'w')
+        currentFile.write(f['data'])
+        currentFile.close()
         print(f)
         return {'success':f}
 
@@ -109,6 +116,8 @@ api.add_resource(fileApi, "/filedir/<string:filename>", endpoint="file")
 
 class fileServer():
     def __init__(self):
+        # If time, create directory with files inside and iterate to fill self.files
+        # instead of explicit initialisation of files
         with open("file1.txt", "r") as myfile:
             data1 = myfile.readlines()
         with open("file2.txt", "r") as myfile:
