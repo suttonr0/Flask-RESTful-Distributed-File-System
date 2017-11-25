@@ -6,8 +6,8 @@ import os
 #  Use Postman desktop application for testing
 #  MongoDB automatically in JSON
 
-app = Flask(__name__)  ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-api = Api(app)  ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+app = Flask(__name__)
+api = Api(app)
 
 #  API for dealing with the list of files as a whole
 class fileListApi(Resource):
@@ -28,15 +28,18 @@ class fileListApi(Resource):
 
     #  Creating new file data and adding it to the list
     def post(self):
-        args = self.reqparser.parse_args()  #
+        args = self.reqparser.parse_args()  # parse the arguments from the POST
         f = {}
         for k, v in args.items():
             f[k] = v
-        self.server.files.append(f)
-        return {'file': f}
+        if f in self.server.files:
+            return {'success':False}
+        else:
+            self.server.files.append(f)
+            return {'success':True}
 
 #  Created a route at /files with an endpoint called files
-api.add_resource(fileListApi, "/filedir", endpoint="filelist")  ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+api.add_resource(fileListApi, "/filedir", endpoint="filelist")
 
 
 #  API for dealing with individual files
@@ -85,7 +88,6 @@ class fileApi(Resource):
 
         # Update file data on disk
         # write_file = open(f['filename'],"w+")
-
         print(f)
         return {'file': f}
 
@@ -93,7 +95,7 @@ class fileApi(Resource):
 #  The 'input string' is taken as the value "name"
 #  This API handles requests such as GET /files/Python3 and PUT {"name":
 #  "Javascript"} for /files/Python
-api.add_resource(fileApi, "/filedir/<string:filename>", endpoint="file")  ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+api.add_resource(fileApi, "/filedir/<string:filename>", endpoint="file")
 
 
 class fileServer():
@@ -107,6 +109,6 @@ class fileServer():
                       {'filename':'file2.txt', "data":data2, "version":0}]
 
 
-if __name__ == "__main__":  ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+if __name__ == "__main__":
     fileS = fileServer()  # Fill fileS with the init values of class fileServer
-    app.run(debug=True)  ## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    app.run(debug=True)

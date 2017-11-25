@@ -1,6 +1,6 @@
 import requests, json
 
-# Returns a dictionary with all files and their data
+# Prints a dictionary with all files and their data
 def listFiles(ip, port):
     location = 'http://{}:{}/filedir'.format(ip, port)
     r = requests.get(location)
@@ -16,7 +16,7 @@ def editFile(fileDict, newText):
 
 # Returns a dictionary with the file name, version number and file content for the filename
 # passed on the fileserver with provided port and ip
-def fileDataGET(ip, port, filename):
+def getFile(ip, port, filename):
     location = 'http://{}:{}/filedir/{}'.format(ip, port, filename)
     r = requests.get(location)
     json_data = json.loads(r.text)  # JSON to dict (JSON
@@ -24,6 +24,13 @@ def fileDataGET(ip, port, filename):
     return json_data
 
 # Takes a dictionary of the file and PUTs it on to the file server with
-def fileDataPUT(ip, port, fileDict):
+def putFile(ip, port, fileDict):
     location = 'http://{}:{}/filedir/{}'.format(ip, port, fileDict['filename'])
     r = requests.put(location, json={'version':fileDict['version'], 'data':fileDict['data']})
+
+def createFile(ip, port, filename, data):
+    location = 'http://{}:{}/filedir'.format(ip, port)
+    r = requests.post(location, json={'filename': filename, 'version': 0, 'data': data})
+    json_data = json.loads(r.text)
+    if json_data['success'] == False:
+        print("We've already got that file. It hasn't been added")

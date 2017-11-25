@@ -6,10 +6,12 @@ import requests, json, clientLibrary
 
 def run():
     clientLibrary.listFiles('127.0.0.1', 5000)
-    firstFile = clientLibrary.fileDataGET('localhost', 5000, 'file2.txt')
+    firstFile = clientLibrary.getFile('localhost', 5000, 'file2.txt')
     firstFile = clientLibrary.editFile(firstFile, "hello new text here")
-    clientLibrary.fileDataPUT('localhost', 5000, firstFile)
+    clientLibrary.putFile('localhost', 5000, firstFile)
+    clientLibrary.createFile('localhost', 5000, 'superfile3.txt', "What a great file")
     clientLibrary.listFiles('127.0.0.1', 5000)
+
     # out_text = "Why hello there what a nice evening"
     # r = requests.put('http://localhost:5000/filedir/file2.txt', json={'version':10, 'data':out_text})  ## NEED JSON
 
