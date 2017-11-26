@@ -37,7 +37,11 @@ class fileListApi(Resource):
         else:
             self.server.files.append(f)  # append to file list
             # Write to disk
-            currentFile = open(f['filename'], 'w')
+            dir = os.path.dirname(__file__)  # Get full path on the system to the current ActualRESTful.py location
+            serverDataPath = os.path.join(dir, 'serverData')  # Append the serverData folder to path
+            serverDataPath = os.path.join(serverDataPath, f['filename'])
+            print(serverDataPath)
+            currentFile = open(serverDataPath, 'w')
             currentFile.write(f['data'])
             currentFile.close()
             return {'success':True}
@@ -72,8 +76,14 @@ class fileApi(Resource):
         if len(f) == 0:
             return {'success': False}  # Not in the list
         self.server.files[:] = [d for d in self.server.files if d.get('filename') != filename]
-        if os.path.exists(filename):
-            os.remove(filename)  # Delete the file from server storage
+
+        dir = os.path.dirname(__file__)  # Get full path on the system to the current ActualRESTful.py location
+        serverDataPath = os.path.join(dir, 'serverData')  # Append the serverData folder to path
+        serverDataPath = os.path.join(serverDataPath, filename)
+        print(serverDataPath)
+
+        if os.path.exists(serverDataPath):
+            os.remove(serverDataPath)  # Delete the file from server storage
         print(self.server.files)
         return {'success':True}
 
@@ -99,8 +109,12 @@ class fileApi(Resource):
                 print(v)
                 f[k] = v
 
+        dir = os.path.dirname(__file__)  # Get full path on the system to the current ActualRESTful.py location
+        serverDataPath = os.path.join(dir, 'serverData')  # Append the serverData folder to path
+        serverDataPath = os.path.join(serverDataPath, f['filename'])
+        print(serverDataPath)
         # Update file data on disk
-        currentFile = open(f['filename'], 'w')
+        currentFile = open(serverDataPath, 'w')
         currentFile.write(f['data'])
         currentFile.close()
         print(f)
@@ -118,13 +132,19 @@ class fileServer():
     def __init__(self):
         # If time, create directory with files inside and iterate to fill self.files
         # instead of explicit initialisation of files
-        with open("file1.txt", "r") as myfile:
-            data1 = myfile.readlines()
-        with open("file2.txt", "r") as myfile:
-            data2 = myfile.readlines()
-        #  Init files
-        self.files = [{'filename':'file1.txt', "data":data1, "version":0},
-                      {'filename':'file2.txt', "data":data2, "version":0}]
+        self.files = []  # Stores all file data
+
+        dir = os.path.dirname(__file__)  # Get full path on the system to the current ActualRESTful.py location
+        filePath = os.path.join(dir, 'serverData')  # Append the serverData folder to path
+        print(filePath)
+        for fileName in os.listdir(filePath):
+            if fileName.endswith(".txt"):  # For each text file in the serverData folder
+                print(os.path.join("serverData", fileName))
+                with open(os.path.join("serverData", fileName), "r") as myfile:
+                    data = myfile.readlines()
+                self.files.append({'filename': fileName, "data": data, "version": 0})
+
+        print(self.files)
 
 
 if __name__ == "__main__":

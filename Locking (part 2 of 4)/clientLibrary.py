@@ -85,7 +85,7 @@ def lockAddToQueue(ip, port, clientID, filename):
     r = requests.put('http://{}:{}/lock/{}'.format(ip, port, filename), json={'id': clientID})
     json_data = json.loads(r.text)  # JSON to dict (JSON
     if json_data['success'] == 'Acquired':
-        print("Added to lock queue for file {}".format(filename))
+        print("Added to lock queue for {}".format(filename))
     else:
         print("Not added to lock queue")
 
@@ -93,6 +93,6 @@ def lockDeleteFromQueue(ip, port, clientID, filename):
     r = requests.delete('http://{}:{}/lock/{}'.format(ip, port, filename), json={'id': clientID})
     json_data = json.loads(r.text)  # JSON to dict (JSON
     if json_data['success'] == 'Removed':
-        print("Removed from lock queue for file {}".format(filename))
+        print("Removed from lock queue for {}".format(filename))
     else:
         print("Not removed from lock queue")
