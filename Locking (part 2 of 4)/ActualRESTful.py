@@ -24,7 +24,7 @@ class lockingFileAccess(Resource):
         if filename in self.server.locks:
             if args['id'] not in self.server.locks[filename]:
                 self.server.locks[filename].append(args['id'])
-                print("appended client {} to lock list for file {}".format(args['id'], filename))
+                print("appended client {} to lock list for {}".format(args['id'], filename))
                 print(self.server.locks)
                 return {'success': 'Acquired'}
             else:
@@ -37,14 +37,15 @@ class lockingFileAccess(Resource):
     #  In order to remove from the list
     def delete(self, filename):
         args = self.reqparser.parse_args()
+        if filename not in self.server.locks:  # File not in the lock list
+            return {'success': 'Not on list'}
         if args['id'] in self.server.locks[filename]:
             self.server.locks[filename].remove(args['id'])
-            print(self.server.locks)
+            print("Lock queue for {}: {}".format(filename, self.server.locks))
             return {'success':'Removed'}
-        else:
-            print("Not on list for some reason")
-            return {'success': 'Not on list'}
-        return
+
+        print("Not on list for some reason")
+        return {'success': 'Not on list'}
 
 api.add_resource(lockingFileAccess, "/lock/<string:filename>", endpoint="lock")
 
@@ -125,6 +126,8 @@ class fileApi(Resource):
     def delete(self, filename):
         args = self.reqparser.parse_args()  # args is a list containing the new data
         print(args)
+        if filename not in self.server.locks:
+            return {'success': 'Not in list'}
 
         if args['clientID'] != self.server.locks[filename][0]:
             return {'success': 'locked'}
