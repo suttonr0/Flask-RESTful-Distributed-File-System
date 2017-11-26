@@ -9,6 +9,57 @@ import os
 app = Flask(__name__)
 api = Api(app)
 
+class lockingFileAccess(Resource):
+    def __init__(self):  # Upon initialisation of the class
+        global fileS  # Init the global server
+        self.server = fileS  # Init the global server
+        super(lockingFileAccess, self).__init__()  # Initialising the Resource class
+        self.reqparser = reqparse.RequestParser()
+        self.reqparser.add_argument('id', type=int, location='json')  # Repeat for multiple variables
+
+    #  Add the client to the lock list for the file
+    def get(self, filename):
+        # Polling implementation (Will quickly say true or false, not loop here)
+        args = self.reqparser.parse_args()  # parse the arguments from the POST
+        if filename in self.server.locks:
+            if args['id'] not in self.server.locks[filename]:
+                self.server.locks[filename].append(args['id'])
+                print("appended client {} to lock list for file {}".format(args['id'], filename))
+                return {'success': 'Acquired'}
+            else:
+                print("already got that one")
+                return {'success': 'Already in list'}  # CLient is already in lock list for
+        else:
+            print("File not on server")
+            return {'success': 'Not on server'}
+        return self.server.locks
+
+    #  In order to remove from the list
+    def put(self, filename):
+        args = self.reqparser.parse_args()
+        if args['id'] in self.server.locks[filename]:
+            pass
+        else:
+            print("not on list for some reason")
+        return
+
+api.add_resource(lockingFileAccess, "/lock/<string:filename>", endpoint="lock")
+
+
+class lockingAcquire(Resource):
+    def __init__(self):  # Upon initialisation of the class
+        global fileS  # Init the global server
+        self.server = fileS  # Init the global server
+        super(lockingAcquire, self).__init__()  # Initialising the Resource class
+
+    #  Give a unique client ID to the client
+    def get(self):
+        self.server.currentID += 1
+        return self.server.currentID
+
+
+api.add_resource(lockingAcquire, "/lock", endpoint="lockID")
+
 #  API for dealing with the list of files as a whole
 class fileListApi(Resource):
     def __init__(self):  # Upon initialisation of the class
@@ -125,6 +176,9 @@ class fileServer():
         #  Init files
         self.files = [{'filename':'file1.txt', "data":data1, "version":0},
                       {'filename':'file2.txt', "data":data2, "version":0}]
+
+        self.locks = {'file1.txt':[],'file2.txt':[]}
+        self.currentID = 0
 
 
 if __name__ == "__main__":
