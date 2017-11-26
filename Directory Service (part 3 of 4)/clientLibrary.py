@@ -4,13 +4,19 @@ import requests, json
 def listFiles(ip, port):
     location = 'http://{}:{}/filedir'.format(ip, port)
     r = requests.get(location)
-    json_data = json.loads(r.text)  # JSON to dict
-    print("List of files on file server:\n")
-    for x in json_data:
-        # ''.join(x['data']) to concatenate the strings in the list form fopen
-        print("--------------------------")
-        print("File Name: {}\nVersion Number: {}\nFile Content:\n{}".format(x['filename'], x['version'], ''.join(x['data'])))
-        print("--------------------------")
+    direct_data = json.loads(r.text)  # JSON to dict (JSON)
+
+    for key in direct_data:
+        print("Files from {}".format(key))
+        location = 'http://{}:{}/filedir'.format(direct_data[key]['ip'], direct_data[key]['port'])
+        r = requests.get(location)
+        json_data = json.loads(r.text)  # JSON to dict
+        print("List of files on file server:\n")
+        for x in json_data:
+            # ''.join(x['data']) to concatenate the strings in the list form fopen
+            print("--------------------------")
+            print("File Name: {}\nVersion Number: {}\nFile Content:\n{}".format(x['filename'], x['version'], ''.join(x['data'])))
+            print("--------------------------")
 
 # Returns a dictionary with the file name, version number and file content for the filename
 # passed on the fileserver with provided port and ip
@@ -61,13 +67,18 @@ def editFile(ip, port, fileDict, newText):
 # Creates a new file called filename with content data (POST)
 def createFile(ip, port, filename, data):
     # Get info for a single file server
+    location = 'http://{}:{}/getServer'.format(ip, port)  # Get address for one of the file servers
+    r = requests.get(location)
+    direct_data = json.loads(r.text)  # convert from JSON to text
 
     # Create the file
-    location = 'http://{}:{}/filedir'.format(ip, port)
+    location = 'http://{}:{}/filedir'.format(direct_data['ip'], direct_data['port'])
     r = requests.post(location, json={'filename': filename, 'version': 0, 'data': data})
     json_data = json.loads(r.text)
     if json_data['success'] == False:
         print("(createFile) The file already exists")
+    else:
+        print("Created file on server at {}:{}".format(direct_data['ip'], direct_data['port']))
 
 # Deletes the file on the server, returns -1 if file not found
 def deleteFile(ip, port, filename):
