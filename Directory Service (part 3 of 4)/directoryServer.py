@@ -55,12 +55,8 @@ class getFileLocation(Resource):
                         'filename':filename}
 
         print(self.server.serverInfo)
-        pass
+        return {'ip':-1}
         # return {"Hello": "World"}  # Automatically converted to JSON since returning a dictionary
-
-    #  Creating new file data and adding it to the list
-    def post(self):
-        pass
 
 #  Created a route at /files with an endpoint called files
 api.add_resource(getFileLocation, "/filedir/<string:filename>", endpoint="file")

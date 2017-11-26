@@ -5,9 +5,18 @@ import requests, json, clientLibrary
 # r_text = r.json()
 
 def run():
-    r = requests.get('http://localhost:5000/filedir/2file1.txt')
+    r = requests.get('http://localhost:5000/filedir/2filwdwdwe1.txt')
     json_data = json.loads(r.text)  # JSON to dict
     print(json_data)
+
+    fileObt = clientLibrary.getFile('localhost', 5000, '1file2.txt')
+    print(fileObt)
+
+    clientLibrary.editFile('localhost', 5000, fileObt, "did this edit right??")
+
+    clientLibrary.deleteFile('localhost', 5000, '2file2.txt')
+
+    clientLibrary.printFile(fileObt)
     # ipAddress = input("Enter the IP of the fileserver: ")
     # portNumber = input("Enter the port number of the fileserver: ")
     # print("IP:{} Port:{}".format(ipAddress,portNumber))
