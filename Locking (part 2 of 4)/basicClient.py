@@ -48,10 +48,34 @@ def run():
     #     elif userChoice == '0':
     #         print("Ending client application")
     #         running = False
+
     ins = input("enter filename")
-    r = requests.get('http://localhost:5000/lock/{}'.format(ins), json={'id':3})
+    # # Request clientID for that server
+    # r = requests.get('http://localhost:5000/lock')
+    # json_data = json.loads(r.text)
+    # clientID = json_data['id']
+
+    #  Add clientID to the library
+    r = requests.put('http://localhost:5000/lock/{}'.format(ins), json={'id': 1})
     json_data = json.loads(r.text)  # JSON to dict (JSON
     print(json_data)
+
+    r = requests.put('http://localhost:5000/lock/{}'.format(ins), json={'id': 2})
+    json_data = json.loads(r.text)  # JSON to dict (JSON
+    print(json_data)
+
+    newfile = clientLibrary.getFile('localhost', 5000, ins)
+    clientLibrary.deleteFile('localhost', 5000, 2, ins)
+
+    r = requests.delete('http://localhost:5000/lock/{}'.format(ins), json={'id': 1})
+    json_data = json.loads(r.text)  # JSON to dict (JSON
+    print(json_data)
+
+    clientLibrary.deleteFile('localhost', 5000, 2, ins)
+
+
+
+
         # clientLibrary.listFiles('127.0.0.1', 5000)
         # firstFile = clientLibrary.getFile('localhost', 5000, 'file1.txt')
         # print(firstFile['data'])

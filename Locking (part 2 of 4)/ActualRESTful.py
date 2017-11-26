@@ -18,13 +18,14 @@ class lockingFileAccess(Resource):
         self.reqparser.add_argument('id', type=int, location='json')  # Repeat for multiple variables
 
     #  Add the client to the lock list for the file
-    def get(self, filename):
+    def put(self, filename):
         # Polling implementation (Will quickly say true or false, not loop here)
         args = self.reqparser.parse_args()  # parse the arguments from the POST
         if filename in self.server.locks:
             if args['id'] not in self.server.locks[filename]:
                 self.server.locks[filename].append(args['id'])
                 print("appended client {} to lock list for file {}".format(args['id'], filename))
+                print(self.server.locks)
                 return {'success': 'Acquired'}
             else:
                 print("already got that one")
@@ -32,15 +33,17 @@ class lockingFileAccess(Resource):
         else:
             print("File not on server")
             return {'success': 'Not on server'}
-        return self.server.locks
 
     #  In order to remove from the list
-    def put(self, filename):
+    def delete(self, filename):
         args = self.reqparser.parse_args()
         if args['id'] in self.server.locks[filename]:
-            pass
+            self.server.locks[filename].remove(args['id'])
+            print(self.server.locks)
+            return {'success':'Removed'}
         else:
-            print("not on list for some reason")
+            print("Not on list for some reason")
+            return {'success': 'Not on list'}
         return
 
 api.add_resource(lockingFileAccess, "/lock/<string:filename>", endpoint="lock")
@@ -55,7 +58,7 @@ class lockingAcquire(Resource):
     #  Give a unique client ID to the client
     def get(self):
         self.server.currentID += 1
-        return self.server.currentID
+        return {'id':self.server.currentID}
 
 
 api.add_resource(lockingAcquire, "/lock", endpoint="lockID")
@@ -108,6 +111,7 @@ class fileApi(Resource):
         self.reqparser.add_argument('filename', type=str, location='json')  # Repeat for multiple variables
         self.reqparser.add_argument('version', type=int, location='json')
         self.reqparser.add_argument('data', type=str, location='json')
+        self.reqparser.add_argument('clientID', type=int, location='json')
         # self.reqparser.add_argument('Client_ID', type=str, location = 'json')  # Repeat for multiple variables
 
     def get(self, filename):
@@ -119,19 +123,28 @@ class fileApi(Resource):
         # return {"Hello": "World"}  # Automatically converted to JSON since returning a dictionary
 
     def delete(self, filename):
+        args = self.reqparser.parse_args()  # args is a list containing the new data
+        print(args)
+
+        if args['clientID'] != self.server.locks[filename][0]:
+            return {'success': 'locked'}
+
         f = [f for f in self.server.files if f['filename'] == filename]
         if len(f) == 0:
-            return {'success': False}  # Not in the list
+            return {'success': 'Not in list'}  # Not in the list
         self.server.files[:] = [d for d in self.server.files if d.get('filename') != filename]
         if os.path.exists(filename):
             os.remove(filename)  # Delete the file from server storage
         print(self.server.files)
-        return {'success':True}
+        return {'success':'Deleted'}
 
     #  FILENAME IS PASSED FROM ENDPOINT <STRING>
     def put(self, filename):
         args = self.reqparser.parse_args()  # args is a list containing the new data
         print(args)
+
+        if args['clientID'] != self.server.locks[filename][0]:
+            return {'success': 'locked'}
         # print(args['version'])
         f = [f for f in self.server.files if f['filename'] == filename]
         if len(f) == 0:

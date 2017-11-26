@@ -29,12 +29,14 @@ def getFile(ip, port, filename):
 # Takes a dictionary of the file, replaces the data with newText and
 # PUTs it on to the file server
 # Returns -1 if file is behind on version
-def editFile(ip, port, fileDict, newText):
+def editFile(ip, port, clientID, fileDict, newText):
     fileDict['data'] = newText
     location = 'http://{}:{}/filedir/{}'.format(ip, port, fileDict['filename'])
-    r = requests.put(location, json={'version': fileDict['version'], 'data':fileDict['data']})
+    r = requests.put(location, json={'version': fileDict['version'], 'data':fileDict['data'], 'clientID':clientID})
     json_data = json.loads(r.text)
-    if json_data['success'] == 'notOnServer':
+    if json_data['success'] == 'locked':
+        print("This file is currently locked. Try again later")
+    elif json_data['success'] == 'notOnServer':
         print("(editFile) File does not exist on server")
     elif json_data['success'] == 'outOfDate':
         print("(editFile) File is behind on version")
@@ -49,15 +51,17 @@ def createFile(ip, port, filename, data):
         print("(createFile) The file already exists")
 
 # Deletes the file on the server, returns -1 if file not found
-def deleteFile(ip, port, filename):
+def deleteFile(ip, port, clientID, filename):
     location = 'http://{}:{}/filedir/{}'.format(ip, port, filename)
-    r = requests.delete(location)
+    r = requests.delete(location, json={'clientID':clientID})
     json_data = json.loads(r.text)  # JSON to dict (JSON
     if 'success' in json_data:
-        if json_data['success'] == False:
+        if json_data['success'] == 'locked':
+            print("(deleteFile) File is locked. Try again later")
+        elif json_data['success'] == 'Not in list':
             print("(deleteFile) File does not exist on server")
             return -1
-        elif json_data['success'] == True:
+        elif json_data['success'] == 'Deleted':
             print("Successful deletion")
 
 def printFile(fileDict):
