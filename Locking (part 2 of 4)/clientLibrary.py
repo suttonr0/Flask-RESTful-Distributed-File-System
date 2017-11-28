@@ -94,5 +94,3 @@ def lockDeleteFromQueue(ip, port, clientID, filename):
     json_data = json.loads(r.text)  # JSON to dict (JSON
     if json_data['success'] == 'Removed':
         print("Removed from lock queue for {}".format(filename))
-    else:
-        print("Not removed from lock queue")
