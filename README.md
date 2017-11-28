@@ -3,7 +3,7 @@ Dependencies of Python3, Flask, Flask-RESTful
 Rowan Sutton
 13330793
 
-This project implements a NFS filesystem. Storage is performed on text files local to the fileserver. For all of the filesystems, the startServer.sh script must be run before the startClient.sh scripts. The server has a serverData folder in its directory which contains the files to be provided to the clients by the server.
+This project implements a NFS filesystem. Storage is performed on text files local to the fileserver. For all of the filesystems, the startServer.sh script must be run before the startClient.sh scripts. For directory service, the startServer1.sh and startServer2.sh scripts must be run before the startDirectoryService.sh script. After these are run, then the startClient.sh scripts can be run.The server has a serverData folder in its directory which contains the files to be provided to the clients by the server.
 
 1. Transparent Distributed Filesystem:
 For the transparent distributed file system, the server sets up two endpoints, one for access to the file list for file creation and listing available files, and the other for accessing and changing individual files. A library named clientLibrary was created to provide access to the functionality of these endpoints while giving transparency for the client. The client only needed to call functions to access file data and not construct individual RESTful requests. The functions allowed listing of all files on the server, printing of file data, editing file data, creation of new files, and deletion of existing files. 
