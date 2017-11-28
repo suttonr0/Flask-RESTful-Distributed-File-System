@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_restful import Resource, Api, reqparse
-import requests, json
+import requests, json, sys
 
 app = Flask(__name__)
 api = Api(app)
@@ -106,8 +106,8 @@ class fileServer():
         # instead of explicit initialisation of files
         self.serverCount = 1
 
-        self.serverInfo = {'fileServer1':{'ip':'localhost', 'port':5001, 'serverFiles':[]},
-                           'fileServer2': {'ip': 'localhost', 'port': 5002, 'serverFiles':[]}}
+        self.serverInfo = {'fileServer1':{'ip':sys.argv[1], 'port':int(sys.argv[2]), 'serverFiles':[]},
+                           'fileServer2': {'ip':sys.argv[3], 'port': int(sys.argv[4]), 'serverFiles':[]}}
         # file server 1 on port 5001
         # file server 2 on port 5002
         location = 'http://{}:{}/filedir'.format(self.serverInfo['fileServer1']['ip'], self.serverInfo['fileServer1']['port'])
@@ -126,8 +126,6 @@ class fileServer():
         for x in json_data:
             self.serverInfo['fileServer2']['serverFiles'].append(x['filename'])
 
-        print(self.serverInfo)
-
 if __name__ == "__main__":
     fileS = fileServer()  # Fill fileS with the init values of class fileServer
-    app.run(port=5000, debug=True)  # PORT 5000
+    app.run(port=int(sys.argv[5]), debug=True)

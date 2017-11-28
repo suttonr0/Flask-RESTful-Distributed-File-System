@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
 from flask_restful import Resource, Api, reqparse
-import os
+import os, sys
 
 #  https://flask-restful.readthedocs.io/en/latest/quickstart.html
 #  Use Postman desktop application for testing
@@ -32,9 +32,11 @@ class fileListApi(Resource):
         f = {}
         for k, v in args.items():
             f[k] = v
-        if f in self.server.files:
+
+        if any(d['filename'] == f['filename'] for d in self.server.files):
             return {'success':False}  # Already in the filesystem
         else:
+            print(f)
             self.server.files.append(f)  # append to file list
             # Write to disk
             dir = os.path.dirname(__file__)  # Get full path on the system to the current ActualRESTful.py location
@@ -136,17 +138,16 @@ class fileServer():
 
         dir = os.path.dirname(__file__)  # Get full path on the system to the current ActualRESTful.py location
         filePath = os.path.join(dir, 'serverData')  # Append the serverData folder to path
-        print(filePath)
+        print("\nServer files found:\n")
         for fileName in os.listdir(filePath):
             if fileName.endswith(".txt"):  # For each text file in the serverData folder
-                print(os.path.join("serverData", fileName))
+                print(fileName)
                 with open(os.path.join("serverData", fileName), "r") as myfile:
                     data = myfile.readlines()
                 self.files.append({'filename': fileName, "data": data, "version": 0})
-
-        print(self.files)
+        print("\n")
 
 
 if __name__ == "__main__":
     fileS = fileServer()  # Fill fileS with the init values of class fileServer
-    app.run(port=5000, debug=True)
+    app.run(port=int(sys.argv[1]), debug=True)

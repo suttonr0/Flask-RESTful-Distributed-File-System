@@ -1,10 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_restful import Resource, Api, reqparse
-import os
+import os, sys
 
-#  https://flask-restful.readthedocs.io/en/latest/quickstart.html
-#  Use Postman desktop application for testing
-#  MongoDB automatically in JSON
 
 app = Flask(__name__)
 api = Api(app)
@@ -32,13 +29,13 @@ class fileListApi(Resource):
         f = {}
         for k, v in args.items():
             f[k] = v
-        if f in self.server.files:
+        if any(d['filename'] == f['filename'] for d in self.server.files):
             return {'success':False}  # Already in the filesystem
         else:
             self.server.files.append(f)  # append to file list
             # Write to disk
             dir = os.path.dirname(__file__)  # Get full path on the system to the current ActualRESTful.py location
-            serverDataPath = os.path.join(dir, 'serverData2')  # Append the serverData folder to path
+            serverDataPath = os.path.join(dir, 'serverData1')  # Append the serverData folder to path
             serverDataPath = os.path.join(serverDataPath, f['filename'])
             print(serverDataPath)
             currentFile = open(serverDataPath, 'w')
@@ -78,7 +75,7 @@ class fileApi(Resource):
         self.server.files[:] = [d for d in self.server.files if d.get('filename') != filename]
 
         dir = os.path.dirname(__file__)  # Get full path on the system to the current ActualRESTful.py location
-        serverDataPath = os.path.join(dir, 'serverData2')  # Append the serverData folder to path
+        serverDataPath = os.path.join(dir, 'serverData1')  # Append the serverData folder to path
         serverDataPath = os.path.join(serverDataPath, filename)
         print(serverDataPath)
 
@@ -110,7 +107,7 @@ class fileApi(Resource):
                 f[k] = v
 
         dir = os.path.dirname(__file__)  # Get full path on the system to the current ActualRESTful.py location
-        serverDataPath = os.path.join(dir, 'serverData2')  # Append the serverData folder to path
+        serverDataPath = os.path.join(dir, 'serverData1')  # Append the serverData folder to path
         serverDataPath = os.path.join(serverDataPath, f['filename'])
         print(serverDataPath)
         # Update file data on disk
@@ -135,18 +132,17 @@ class fileServer():
         self.files = []  # Stores all file data
 
         dir = os.path.dirname(__file__)  # Get full path on the system to the current ActualRESTful.py location
-        filePath = os.path.join(dir, 'serverData2')  # Append the serverData folder to path
-        print(filePath)
+        filePath = os.path.join(dir, 'serverData1')  # Append the serverData folder to path
+        print("\nServer files found:\n")
         for fileName in os.listdir(filePath):
             if fileName.endswith(".txt"):  # For each text file in the serverData folder
-                print(os.path.join("serverData2", fileName))
-                with open(os.path.join("serverData2", fileName), "r") as myfile:
+                print(fileName)
+                with open(os.path.join("serverData1", fileName), "r") as myfile:
                     data = myfile.readlines()
                 self.files.append({'filename': fileName, "data": data, "version": 0})
-
-        print(self.files)
+        print("\n")
 
 
 if __name__ == "__main__":
     fileS = fileServer()  # Fill fileS with the init values of class fileServer
-    app.run(port=5002, debug=True)
+    app.run(port=int(sys.argv[1]), debug=True)

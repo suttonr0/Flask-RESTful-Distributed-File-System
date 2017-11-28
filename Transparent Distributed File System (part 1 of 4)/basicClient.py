@@ -1,12 +1,9 @@
-import requests, json, clientLibrary
+import clientLibrary, sys
 
-#  https://flask-restful.readthedocs.io/en/latest/quickstart.html
-# r = requests.get()
-# r_text = r.json()
 
 def run():
-    ipAddress = input("Enter the IP of the fileserver: ")
-    portNumber = input("Enter the port number of the fileserver: ")
+    ipAddress = sys.argv[1]
+    portNumber = int(sys.argv[2])
     print("IP:{} Port:{}".format(ipAddress,portNumber))
     running = True
     while running:
