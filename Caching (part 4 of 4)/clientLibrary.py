@@ -73,9 +73,9 @@ def uploadFile(ip, port, filename, clientCache):
     r = requests.put(location, json={'version': f['version'], 'data':f['data']})
     json_data = json.loads(r.text)
     if json_data['success'] == 'notOnServer':
-        print("(editFile) File does not exist on server")
+        print("(uploadFile) File does not exist on server")
     elif json_data['success'] == 'outOfDate':
-        print("(editFile) File is behind on version. Get the updated version")
+        print("(uploadFile) File is behind on version. Get the updated version")
         # Remove file from cache so that the next time it is accessed, it is from the fileserver and not the cache
         clientCache.remove(f)
         print("{} removed from cache".format(f['filename']))
@@ -105,8 +105,11 @@ def deleteFile(ip, port, filename, clientCache):
             print("Successful deletion")
     # Need to remove from cache
     f = [f for f in clientCache if f['filename'] == filename]
+    if len(f) == 0:
+        return
     f = f[0]
     clientCache.remove(f)
+    print("Removed {} from cache".format(f['filename']))
 
 # Try to print from cache first
 def printFile(fileDict):
