@@ -1,4 +1,6 @@
-Dependencies of Python3, Flask, Flask-RESTful
+Dependencies of Python3, Flask, Flask-RESTful, requests
+
+Flask, Flask-RESTful and requests can be installed via pip
 
 Rowan Sutton
 13330793
