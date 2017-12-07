@@ -128,4 +128,4 @@ class fileServer():
 
 if __name__ == "__main__":
     fileS = fileServer()  # Fill fileS with the init values of class fileServer
-    app.run(port=int(sys.argv[5]), debug=True)
+    app.run(port=int(sys.argv[5]))
