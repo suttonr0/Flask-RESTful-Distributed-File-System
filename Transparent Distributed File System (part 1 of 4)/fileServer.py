@@ -21,7 +21,6 @@ class fileListApi(Resource):
 
     def get(self):
         return self.server.files
-        # return {"Hello": "World"}  # Automatically converted to JSON since returning a dictionary
 
     #  Creating new file data and adding it to the list
     def post(self):
@@ -38,6 +37,7 @@ class fileListApi(Resource):
             serverDataPath = os.path.join(dir, 'serverData')  # Append the serverData folder to path
             serverDataPath = os.path.join(serverDataPath, f['filename'])
             print(serverDataPath)
+            # Open the file, write the data and then close the file
             currentFile = open(serverDataPath, 'w')
             currentFile.write(f['data'])
             currentFile.close()
@@ -58,15 +58,13 @@ class fileApi(Resource):
         self.reqparser.add_argument('filename', type=str, location='json')  # Repeat for multiple variables
         self.reqparser.add_argument('version', type=int, location='json')
         self.reqparser.add_argument('data', type=str, location='json')
-        # self.reqparser.add_argument('Client_ID', type=str, location = 'json')  # Repeat for multiple variables
 
     def get(self, filename):
         f = [f for f in self.server.files if f['filename'] == filename]
         if len(f) == 0:
             return {'success': False}  # Not in the list
         f = f[0]  # Take first element of f (should only be one)
-        return f # f['filename'] to just get the name of the file
-        # return {"Hello": "World"}  # Automatically converted to JSON since returning a dictionary
+        return f  # Return the data for the file with name filename
 
     def delete(self, filename):
         f = [f for f in self.server.files if f['filename'] == filename]
@@ -84,22 +82,20 @@ class fileApi(Resource):
         print(self.server.files)
         return {'success':True}
 
-    #  FILENAME IS PASSED FROM ENDPOINT <STRING>
     def put(self, filename):
         args = self.reqparser.parse_args()  # args is a list containing the new data
         print(args)
-        # print(args['version'])
         f = [f for f in self.server.files if f['filename'] == filename]
         if len(f) == 0:
             return {'success': 'notOnServer'}
         f = f[0]  # Only take the first value.
         # f now contains the JSON data for the filename passed through the endpoint <string>
-        # Check version
+        # Check version of file
         if args['version'] < f['version']:
-            return {'success':'outOfDate'}
+            return {'success':'outOfDate'}  # File is behind on version
+        # File can only be changed if it is the correct version
 
         args['version'] = args['version'] + 1  # increment version number
-
         # For each argument in the JSON object update the file stored in memory
         for k, v in args.items():
              if v != None:
@@ -120,17 +116,12 @@ class fileApi(Resource):
 
 #  Created a route at /files/'input string' with an endpoint called files
 #  The 'input string' is taken as the value "name"
-#  This API handles requests such as GET /files/Python3 and PUT {"name":
-#  "Javascript"} for /files/Python
 api.add_resource(fileApi, "/filedir/<string:filename>", endpoint="file")
 
 
 class fileServer():
     def __init__(self):
-        # If time, create directory with files inside and iterate to fill self.files
-        # instead of explicit initialisation of files
         self.files = []  # Stores all file data
-
         dir = os.path.dirname(__file__)  # Get full path on the system to the current ActualRESTful.py location
         filePath = os.path.join(dir, 'serverData')  # Append the serverData folder to path
         print("\nServer files found:\n")
@@ -139,7 +130,7 @@ class fileServer():
                 print(fileName)
                 with open(os.path.join("serverData", fileName), "r") as myfile:
                     data = myfile.readlines()
-                self.files.append({'filename': fileName, "data": data, "version": 0})
+                self.files.append({'filename': fileName, "data": data, "version": 0})  # Add the file data to the list
         print("\n")
 
 
